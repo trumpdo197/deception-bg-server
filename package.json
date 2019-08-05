@@ -1,0 +1,24 @@
+{
+  "name": "deception-server",
+  "version": "1.0.0",
+  "description": "Private server for Deception Boardgame",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development nodemon --inspect ./index.js 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.3.0-beta2",
+    "mongoose": "^5.6.6",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "nodemon": "^1.19.1"
+  }
+}
