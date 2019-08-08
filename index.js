@@ -39,6 +39,7 @@ theModule.mongoose = mongoose;
 const io = require('socket.io')(server);
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
+const Room = require('./models/room');
 
 io.on('connection', function (socket) {
   socket.emit('welcome', {
@@ -96,13 +97,15 @@ io.on('connection', function (socket) {
 
         if (isMatch) {
           const verifiedUser = {};
-          
+
+          verifiedUser.id = user.id;
           verifiedUser.username = user.username;
+          verifiedUser.playerName = user.playerName;
           verifiedUser.totalPlayed = user.totalPlayed;
           verifiedUser.totalWin = user.totalWin;
           verifiedUser.totalLose = user.totalLose;
 
-          let token = jwt.sign(verifiedUser, 'secret', { expiresIn: '1h' });
+          let token = jwt.sign(verifiedUser, configs.jwt_secret, { expiresIn: '1h' });
 
           socket.emit('sv_loginCb', {
             success: 'Logged in.',
@@ -111,5 +114,27 @@ io.on('connection', function (socket) {
         }
       })
     });
+  })
+
+  socket.on('room.create', function(data = {}) {
+    const { token } = data;
+
+    if (!jwt.verify(token, configs.jwt_secret)) {
+      return;
+    }
+
+    const { id } = jwt.decode(token);
+
+    console.log(`Creating a new room for ${id}`);
+
+    const newRoom = new Room({
+      hostId: id,
+      players: [id]
+    });
+
+    newRoom.save();
+
+    console.log('Emitting Room List Callback');
+    io.emit('sv_room.listCb');
   })
 });
