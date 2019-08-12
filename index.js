@@ -88,30 +88,36 @@ io.on('connection', function (socket) {
     User.findOne({
       username
     }, function(err, user) {
+      if (err || !user)    {
+        socket.emit('sv_loginCb', {
+          error: 'Username not found',
+        })
+        return;
+      }
+
       user.comparePassword(password, function(err, isMatch){
-        if (err) {
+        if (err || !isMatch) {
           socket.emit('sv_login', {
             error: 'Wrong username or password.',
           });
         }
 
-        if (isMatch) {
-          const verifiedUser = {};
+        const verifiedUser = {};
 
-          verifiedUser.id = user.id;
-          verifiedUser.username = user.username;
-          verifiedUser.playerName = user.playerName;
-          verifiedUser.totalPlayed = user.totalPlayed;
-          verifiedUser.totalWin = user.totalWin;
-          verifiedUser.totalLose = user.totalLose;
+        verifiedUser.id = user.id;
+        verifiedUser.username = user.username;
+        verifiedUser.playerName = user.playerName;
+        verifiedUser.totalPlayed = user.totalPlayed;
+        verifiedUser.totalWin = user.totalWin;
+        verifiedUser.totalLose = user.totalLose;
 
-          let token = jwt.sign(verifiedUser, configs.jwt_secret, { expiresIn: '1h' });
+        let token = jwt.sign(verifiedUser, configs.jwt_secret, { expiresIn: '1h' });
 
-          socket.emit('sv_loginCb', {
-            success: 'Logged in.',
-            token
-          });
-        }
+        socket.emit('sv_loginCb', {
+          success: 'Logged in.',
+          token
+        });
+        
       })
     });
   })
@@ -135,6 +141,6 @@ io.on('connection', function (socket) {
     newRoom.save();
 
     console.log('Emitting Room List Callback');
-    io.emit('sv_room.listCb');
+    io.emit('sv_room.listCb', newRoom);
   })
 });
