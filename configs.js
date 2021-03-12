@@ -1,7 +1,7 @@
 module.exports = {
-  port: 69,
+  port: 80,
   db: {
-    url: 'mongodb://localhost:27017/deception'
+    url: "db:27017",
   },
-  jwt_secret: 'b1gCr4sh@#', 
+  jwt_secret: "b1gCr4sh@#",
 };
